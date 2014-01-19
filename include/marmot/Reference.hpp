@@ -24,14 +24,14 @@
 
 #include "marmot/Error.hpp"
 #include <squirrel.h>
-#include <iostream>
 #include <memory>
 #include <string>
 
 namespace marmot {
-  namespace detail {
 
-  } // detail
+  namespace detail {
+    int referenceCount = 0;
+  }
 
   class Reference {
   private:
@@ -39,14 +39,11 @@ namespace marmot {
     HSQOBJECT obj;
 
     bool release() {
-      // std::cout << "RELEASING!" << std::endl;
-      releaseCount--;
+      detail::referenceCount--;
       return SQ_SUCCEEDED(sq_release(vm, &obj));
     }
 
   public:
-    static int releaseCount;
-
     Reference() noexcept
       : vm(nullptr)
     {
@@ -56,43 +53,35 @@ namespace marmot {
     Reference(HSQUIRRELVM vm, int index)
       : vm(vm)
     {
-      // std::cout << "Called \"Reference(HSQUIRRELVM vm, int index)\"" << std::endl;
       sq_resetobject(&obj);            // Initialize the handle
       sq_getstackobj(vm, index, &obj); // Retrieve an object handle from index
       sq_addref(vm, &obj);             // Adds a reference to the object
-      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
-      releaseCount++;
+      detail::referenceCount++;
     }
 
     Reference(Reference&& other) noexcept {
-      // std::cout << "Called \"Reference(Reference&& other)\"" << std::endl;
       vm = other.vm;
       obj = other.obj;
       sq_addref(vm, &obj);
-      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
-      releaseCount++;
+      detail::referenceCount++;
 
       other.vm = nullptr;
     }
 
     Reference(const Reference& other) noexcept {
-      // std::cout << "Called \"Reference(const Reference& other)\"" << std::endl;
       vm = other.vm;
       obj = other.obj;
       sq_addref(vm, &obj);
-      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
-      releaseCount++;
+      detail::referenceCount++;
     }
 
     Reference& operator=(Reference&& other) noexcept {
-      // std::cout << "Called \"Reference& operator=(Reference&& other)\"" << std::endl;
       release();
 
       vm = other.vm;
       obj = other.obj;
       sq_addref(vm, &obj);
-      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
-      releaseCount++;
+      detail::referenceCount++;
 
       other.release();
       other.vm = nullptr;
@@ -101,32 +90,25 @@ namespace marmot {
     }
 
     Reference& operator=(const Reference& other) noexcept {
-      // std::cout << "Called \"Reference& operator=(const Reference& other)\"" << std::endl;
-      release();
+      if(this != &other) {
+        release();
 
-      vm = other.vm;
-      obj = other.obj;
-      sq_addref(vm, &obj);
-      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
-      releaseCount++;
+        vm = other.vm;
+        obj = other.obj;
+        sq_addref(vm, &obj);
+        detail::referenceCount++;
+      } 
 
       return *this;
     }
 
     virtual ~Reference() {
-      // std::cout << "~Reference()" << std::endl;
-
       if(vm) {
-        if(release()) {
-          // std::cout << "RELEASING ALL REFERENCES!" << std::endl;
-        }
-        // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
-      } else {
-        // std::cout << "Can't release since my VM is null!" << std::endl;
-      }
+        release();
+      } 
     }
 
-    void push() {
+    void push() const {
       sq_pushobject(vm, obj);
     }
 
@@ -134,63 +116,68 @@ namespace marmot {
       return sq_getrefcount(vm, &obj);
     }
 
+    HSQUIRRELVM getState() const noexcept {
+      return vm;
+    }
+
     std::string getTypeString() {
       push();
+
       std::string typeString;
+
       switch(sq_gettype(vm, -1)) {
         case OT_NULL:
-          typeString = std::string("null");
+          typeString = {"null"};
           break;
         case OT_INTEGER:
-          typeString = std::string("integer");
+          typeString = {"integer"};
           break;
         case OT_FLOAT:
-          typeString = std::string("float");
+          typeString = {"float"};
           break;
         case OT_STRING:
-          typeString = std::string("string");
+          typeString = {"string"};
           break;
         case OT_TABLE:
-          typeString = std::string("table");
+          typeString = {"table"};
           break;
         case OT_ARRAY:
-          typeString = std::string("array");
+          typeString = {"array"};
           break;
         case OT_USERDATA:
-          typeString = std::string("userdata");
+          typeString = {"userdata"};
           break;
         case OT_CLOSURE:
-          typeString = std::string("closure(function)");
+          typeString = {"closure (function)"};
           break;
         case OT_NATIVECLOSURE:
-          typeString = std::string("native closure(C function)");
+          typeString = {"native closure (C function)"};
           break;
         case OT_GENERATOR:
-          typeString = std::string("generator");
+          typeString = {"generator"};
           break;
         case OT_USERPOINTER:
-          typeString = std::string("userpointer");
+          typeString = {"userpointer"};
           break;
         case OT_CLASS:
-          typeString = std::string("class");
+          typeString = {"class"};
           break;
         case OT_INSTANCE:
-          typeString = std::string("instance");
+          typeString = {"instance"};
           break;
         case OT_WEAKREF:
-          typeString = std::string("weak reference");
+          typeString = {"weak reference"};
           break;
         default:
           throw MarmotError("invalid object type");
       }
+
       sq_pop(vm, 1);
 
       return typeString;
     }
-
   };
 
-  int Reference::releaseCount = 0;
 } // marmot
 
 #endif // MARMOT_REFERENCE_HPP

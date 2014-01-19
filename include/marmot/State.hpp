@@ -24,6 +24,7 @@
 
 #include "marmot/Error.hpp"
 #include "marmot/Reference.hpp"
+#include "marmot/Table.hpp"
 #include <squirrel.h>
 #include <iostream>
 #include <memory>
@@ -52,11 +53,15 @@ namespace marmot {
   class State {
   private:
     std::unique_ptr<SQVM, void(*)(SQVM*)> vm;
-    Reference root;
+    Table root;
 
-    Reference && _getRootTable() {
+    /**
+     * Returns a Table object to the root table.
+     * @return a Table object to the root table.
+     */
+    Table && _getRootTable() {
       sq_pushroottable(vm.get());
-      auto result = Reference(vm.get(), -1);
+      auto result = Table(vm.get(), -1);
       sq_pop(vm.get(), 1);
 
       return std::move(result);
@@ -70,7 +75,7 @@ namespace marmot {
       sq_setprintfunc(vm.get(), detail::print, detail::error);
 
       std::cout << "Stack size at start: " << sq_gettop(vm.get()) << std::endl;
-      std::cout << "Reference count: " << Reference::releaseCount << std::endl;
+      std::cout << "Reference count: " << marmot::detail::referenceCount << std::endl;
 
       sq_pushroottable(vm.get());
       sq_pushstring(vm.get(), "print", -1);
@@ -81,21 +86,32 @@ namespace marmot {
       sq_pop(vm.get(), 2);          //pops the roottable and the function
 
       sq_pushroottable(vm.get());
-      root = Reference(vm.get(), -1);
-      std::cout << "Reference count: " << Reference::releaseCount << std::endl;
+
+      // root = Reference(vm.get(), -1);
+      std::cout << "Reference count: " << marmot::detail::referenceCount << std::endl;
       std::cout << "My type: " << root.getTypeString() << std::endl;
       sq_pop(vm.get(), 1);
 
       _getRootTable();
 
       Reference r2 = _getRootTable();
-      std::cout << "Reference count: " << Reference::releaseCount << std::endl;
+      std::cout << "Reference count: " << marmot::detail::referenceCount << std::endl;
+
+      Reference r3(r2);
+      std::cout << "Reference count: " << marmot::detail::referenceCount << std::endl;
+
+      r3 = r3;
 
       std::cout << "Stack size at finish: " << sq_gettop(vm.get()) << std::endl;
+      std::cout << "Root table has " << root.getSlots().size() << " slot(s)." << std::endl;
     }
 
     ~State() {
       std::cout << "~State() " << sq_gettop(vm.get()) << std::endl; 
+    }
+
+    const HSQUIRRELVM getVM() const {
+      return vm.get();
     }
   };
 } // marmot

@@ -7,14 +7,14 @@
 
 int main(int argc, char** argv) {
 
-  std::cout << "Reference count at beginning: " << marmot::Reference::releaseCount << std::endl;
+  std::cout << "Reference count at beginning: " << marmot::detail::referenceCount << std::endl;
   
   {
     marmot::State sq;
-    std::cout << "Reference count in scope: " << marmot::Reference::releaseCount << std::endl;
+    std::cout << "Reference count in scope: " << marmot::detail::referenceCount << std::endl;
   }
 
-  std::cout << "Reference count at end: " << marmot::Reference::releaseCount << std::endl;
+  std::cout << "Reference count at end: " << marmot::detail::referenceCount << std::endl;
   // std::cout << "Marmot test program." << std::endl;
 
   // marmot::VM machine;
