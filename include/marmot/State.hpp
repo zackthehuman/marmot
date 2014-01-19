@@ -19,8 +19,8 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SQUIRTLE_STATE_HPP
-#define SQUIRTLE_STATE_HPP
+#ifndef MARMOT_STATE_HPP
+#define MARMOT_STATE_HPP
 
 #include "marmot/Error.hpp"
 #include "marmot/Reference.hpp"
@@ -85,4 +85,4 @@ namespace marmot {
   };
 } // marmot
 
-#endif // SQUIRTLE_STATE_HPP
+#endif // MARMOT_STATE_HPP

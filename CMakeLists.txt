@@ -31,48 +31,48 @@ cmake_minimum_required(VERSION 2.8)
 
 project(marmot)
 
-set(SQUIRTLE_EXE_NAME marmot)
-set(SQUIRTLE_LIBRARY_NAME libmarmot)
+set(MARMOT_EXE_NAME marmot)
+set(MARMOT_LIBRARY_NAME libmarmot)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(SQUIRTLE_X64 TRUE)
-        set(SQUIRTLE_TARGET_PLATFORM x64)
+        set(MARMOT_X64 TRUE)
+        set(MARMOT_TARGET_PLATFORM x64)
 else()
-        set(SQUIRTLE_X86 TRUE)
-        set(SQUIRTLE_TARGET_PLATFORM x86)
+        set(MARMOT_X86 TRUE)
+        set(MARMOT_TARGET_PLATFORM x86)
 endif()
 
-message(STATUS "Target platform: ${SQUIRTLE_TARGET_PLATFORM}")
+message(STATUS "Target platform: ${MARMOT_TARGET_PLATFORM}")
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -O")
 
 #
 # main
 #
-set(SQUIRTLE_SRC_MAIN
+set(MARMOT_SRC_MAIN
     src/Main.cpp
 )
 
-set(SQUIRTLE_HEADER_MAIN
+set(MARMOT_HEADER_MAIN
     include/Main.hpp
 )
 
-source_group("main" FILES ${SQUIRTLE_SRC_MAIN} ${SQUIRTLE_HEADER_MAIN})
+source_group("main" FILES ${MARMOT_SRC_MAIN} ${MARMOT_HEADER_MAIN})
 
 #
 # library
 #
-set(SQUIRTLE_SRC_LIBRARY
+set(MARMOT_SRC_LIBRARY
     src/marmot/VM.cpp
 )
 
-set(SQUIRTLE_SRC_LIBRARY
+set(MARMOT_SRC_LIBRARY
     include/marmot/VM.hpp
     include/marmot/Error.hpp
     include/marmot/State.hpp
 )
 
-source_group("library" FILES ${SQUIRTLE_SRC_LIBRARY} ${SQUIRTLE_HEADER_LIBRARY})
+source_group("library" FILES ${MARMOT_SRC_LIBRARY} ${MARMOT_HEADER_LIBRARY})
 
 set(SQUIRREL_DIR "${PROJECT_SOURCE_DIR}/extlibs/squirrel")
 set(SQUIRREL_FILES
@@ -112,9 +112,9 @@ include_directories(
 # marmot (executable)
 #
 add_executable(
-    ${SQUIRTLE_EXE_NAME}
-    ${SQUIRTLE_SRC_MAIN}
-    ${SQUIRTLE_SRC_LIBRARY}
+    ${MARMOT_EXE_NAME}
+    ${MARMOT_SRC_MAIN}
+    ${MARMOT_SRC_LIBRARY}
     ${SQUIRREL_FILES}
 )
 

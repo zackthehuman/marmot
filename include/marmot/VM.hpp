@@ -1,5 +1,5 @@
-#ifndef SQUIRTLE_VM_INCLUDED
-#define SQUIRTLE_VM_INCLUDED
+#ifndef MARMOT_VM_INCLUDED
+#define MARMOT_VM_INCLUDED
 
 #include <cstdarg>
 #include <iostream>
@@ -139,4 +139,4 @@ namespace marmot {
 
 } // marmot
 
-#endif // SQUIRTLE_VM_INCLUDED
+#endif // MARMOT_VM_INCLUDED

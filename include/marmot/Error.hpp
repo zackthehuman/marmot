@@ -19,8 +19,8 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SQUIRTLE_ERROR_HPP
-#define SQUIRTLE_ERROR_HPP
+#ifndef MARMOT_ERROR_HPP
+#define MARMOT_ERROR_HPP
 
 #include <stdexcept>
 #include <string>
@@ -34,4 +34,4 @@ namespace marmot {
   };
 } // marmot
 
-#endif // SQUIRTLE_ERROR_HPP
+#endif // MARMOT_ERROR_HPP
