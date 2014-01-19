@@ -1,11 +1,20 @@
 #include "Main.hpp"
 #include "marmot/VM.hpp"
 #include "marmot/State.hpp"
+#include "marmot/Reference.hpp"
 
 #include <iostream>
 
 int main(int argc, char** argv) {
-  marmot::State sq;
+
+  std::cout << "Reference count at beginning: " << marmot::Reference::releaseCount << std::endl;
+  
+  {
+    marmot::State sq;
+    std::cout << "Reference count in scope: " << marmot::Reference::releaseCount << std::endl;
+  }
+
+  std::cout << "Reference count at end: " << marmot::Reference::releaseCount << std::endl;
   // std::cout << "Marmot test program." << std::endl;
 
   // marmot::VM machine;

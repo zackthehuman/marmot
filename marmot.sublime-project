@@ -1,0 +1,24 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+
+  "build_systems":
+  [
+    {
+      "name": "Build",
+      "cmd": [ "make" ],
+      "file_regex": "/([^/:]+):(\\d+):(\\d+): ",
+      "working_dir": "${project_path}//..//build-marmot"
+    }
+  ],
+
+  "settings":
+  {
+    "tab_size": 2,
+    "translate_tabs_to_spaces": true
+  }
+}

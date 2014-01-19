@@ -38,7 +38,15 @@ namespace marmot {
     HSQUIRRELVM vm = nullptr; // Non-owning pointer
     HSQOBJECT obj;
 
+    bool release() {
+      // std::cout << "RELEASING!" << std::endl;
+      releaseCount--;
+      return SQ_SUCCEEDED(sq_release(vm, &obj));
+    }
+
   public:
+    static int releaseCount;
+
     Reference() noexcept
       : vm(nullptr)
     {
@@ -48,54 +56,82 @@ namespace marmot {
     Reference(HSQUIRRELVM vm, int index)
       : vm(vm)
     {
+      // std::cout << "Called \"Reference(HSQUIRRELVM vm, int index)\"" << std::endl;
       sq_resetobject(&obj);            // Initialize the handle
       sq_getstackobj(vm, index, &obj); // Retrieve an object handle from index
       sq_addref(vm, &obj);             // Adds a reference to the object
+      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
+      releaseCount++;
     }
 
     Reference(Reference&& other) noexcept {
+      // std::cout << "Called \"Reference(Reference&& other)\"" << std::endl;
       vm = other.vm;
       obj = other.obj;
-      // sq_addref(vm, &obj);
+      sq_addref(vm, &obj);
+      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
+      releaseCount++;
 
       other.vm = nullptr;
     }
 
-    Reference& operator=(Reference&& other) noexcept {
+    Reference(const Reference& other) noexcept {
+      // std::cout << "Called \"Reference(const Reference& other)\"" << std::endl;
       vm = other.vm;
       obj = other.obj;
-      // sq_addref(vm, &obj);
+      sq_addref(vm, &obj);
+      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
+      releaseCount++;
+    }
 
+    Reference& operator=(Reference&& other) noexcept {
+      // std::cout << "Called \"Reference& operator=(Reference&& other)\"" << std::endl;
+      release();
+
+      vm = other.vm;
+      obj = other.obj;
+      sq_addref(vm, &obj);
+      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
+      releaseCount++;
+
+      other.release();
       other.vm = nullptr;
 
       return *this;
     }
 
-    Reference(const Reference& other) noexcept {
+    Reference& operator=(const Reference& other) noexcept {
+      // std::cout << "Called \"Reference& operator=(const Reference& other)\"" << std::endl;
+      release();
+
       vm = other.vm;
       obj = other.obj;
       sq_addref(vm, &obj);
-    }
+      // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
+      releaseCount++;
 
-    Reference& operator=(const Reference& other) noexcept {
-      vm = other.vm;
-      obj = other.obj;
-      sq_release(vm, &obj);
       return *this;
     }
 
     virtual ~Reference() {
-      std::cout << "~Reference()" << std::endl;
+      // std::cout << "~Reference()" << std::endl;
+
       if(vm) {
-        std::cout << "RELEASING!" << std::endl;
-        if(SQ_SUCCEEDED(sq_release(vm, &obj))) {
-          std::cout << "RELEASING ALL REFERENCES!" << std::endl;
+        if(release()) {
+          // std::cout << "RELEASING ALL REFERENCES!" << std::endl;
         }
+        // std::cout << "RefCount: " << sq_getrefcount(vm, &obj) << std::endl;
+      } else {
+        // std::cout << "Can't release since my VM is null!" << std::endl;
       }
     }
 
     void push() {
       sq_pushobject(vm, obj);
+    }
+
+    unsigned int getReferenceCount() {
+      return sq_getrefcount(vm, &obj);
     }
 
     std::string getTypeString() {
@@ -153,6 +189,8 @@ namespace marmot {
     }
 
   };
+
+  int Reference::releaseCount = 0;
 } // marmot
 
 #endif // MARMOT_REFERENCE_HPP

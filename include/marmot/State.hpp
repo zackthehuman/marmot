@@ -54,14 +54,23 @@ namespace marmot {
     std::unique_ptr<SQVM, void(*)(SQVM*)> vm;
     Reference root;
 
+    Reference && _getRootTable() {
+      sq_pushroottable(vm.get());
+      auto result = Reference(vm.get(), -1);
+      sq_pop(vm.get(), 1);
+
+      return std::move(result);
+    }
+
   public:
     State(const unsigned int stackSize = 1024)
       : vm(sq_open(stackSize), sq_close)
-      , root()
+      , root(_getRootTable())
     {
       sq_setprintfunc(vm.get(), detail::print, detail::error);
 
       std::cout << "Stack size at start: " << sq_gettop(vm.get()) << std::endl;
+      std::cout << "Reference count: " << Reference::releaseCount << std::endl;
 
       sq_pushroottable(vm.get());
       sq_pushstring(vm.get(), "print", -1);
@@ -73,8 +82,14 @@ namespace marmot {
 
       sq_pushroottable(vm.get());
       root = Reference(vm.get(), -1);
+      std::cout << "Reference count: " << Reference::releaseCount << std::endl;
       std::cout << "My type: " << root.getTypeString() << std::endl;
       sq_pop(vm.get(), 1);
+
+      _getRootTable();
+
+      Reference r2 = _getRootTable();
+      std::cout << "Reference count: " << Reference::releaseCount << std::endl;
 
       std::cout << "Stack size at finish: " << sq_gettop(vm.get()) << std::endl;
     }
