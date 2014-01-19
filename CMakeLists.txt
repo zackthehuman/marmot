@@ -29,10 +29,10 @@ endif()
 
 cmake_minimum_required(VERSION 2.8)
 
-project(squirtle)
+project(marmot)
 
-set(SQUIRTLE_EXE_NAME squirtle)
-set(SQUIRTLE_LIBRARY_NAME libsquirtle)
+set(SQUIRTLE_EXE_NAME marmot)
+set(SQUIRTLE_LIBRARY_NAME libmarmot)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(SQUIRTLE_X64 TRUE)
@@ -63,11 +63,13 @@ source_group("main" FILES ${SQUIRTLE_SRC_MAIN} ${SQUIRTLE_HEADER_MAIN})
 # library
 #
 set(SQUIRTLE_SRC_LIBRARY
-    src/squirtle/VM.cpp
+    src/marmot/VM.cpp
 )
 
 set(SQUIRTLE_SRC_LIBRARY
-    include/squirtle/VM.hpp
+    include/marmot/VM.hpp
+    include/marmot/Error.hpp
+    include/marmot/State.hpp
 )
 
 source_group("library" FILES ${SQUIRTLE_SRC_LIBRARY} ${SQUIRTLE_HEADER_LIBRARY})
@@ -107,7 +109,7 @@ include_directories(
 )
 
 #
-# squirtle (executable)
+# marmot (executable)
 #
 add_executable(
     ${SQUIRTLE_EXE_NAME}
