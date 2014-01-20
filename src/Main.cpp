@@ -18,6 +18,7 @@ int main(int argc, char** argv) {
     std::cout << "Root table has " << root.getSize() << " slot(s)." << std::endl;
 
     root.set("someKey", 1337);
+    root["anotherKey"] = "anotherValue";
 
     std::cout << "Root table has " << root.getSize() << " slot(s)." << std::endl;
 
@@ -28,6 +29,9 @@ int main(int argc, char** argv) {
 
     auto val = root.get<int>("someKey");
     std::cout << "someKey = " << val << std::endl;
+
+    auto val2 = root.get<std::string>("anotherKey");
+    std::cout << "anotherKey = " << val2 << std::endl;
   }
 
   std::cout << "Reference count at end: " << marmot::detail::referenceCount << std::endl;

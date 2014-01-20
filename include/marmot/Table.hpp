@@ -23,6 +23,7 @@
 #define MARMOT_TABLE_HPP
 
 #include "marmot/Reference.hpp"
+#include "marmot/Proxy.hpp"
 #include "marmot/Stack.hpp"
 #include <squirrel.h>
 #include <string>
@@ -91,6 +92,16 @@ namespace marmot {
       auto value = stack::get<T>(getState(), -1);
       sq_pop(getState(), 2); // Pops the slot value and table
       return value;
+    }
+
+    template<typename T>
+    Proxy<Table, T> operator[](T&& key) {
+        return Proxy<Table, T>(*this, std::forward<T>(key));
+    }
+
+    template<typename T>
+    Proxy<const Table, T> operator[](T&& key) const {
+        return Proxy<const Table, T>(*this, std::forward<T>(key));
     }
   };
 
