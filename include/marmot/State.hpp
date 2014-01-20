@@ -54,6 +54,7 @@ namespace marmot {
   private:
     std::unique_ptr<SQVM, void(*)(SQVM*)> vm;
     Table root;
+    Table constants;
 
     /**
      * Returns a Table object to the root table.
@@ -67,10 +68,23 @@ namespace marmot {
       return std::move(result);
     }
 
+    /**
+     * Returns a Table object to the constants table.
+     * @return a Table object to the constants table.
+     */
+    Table && _getConstTable() {
+      sq_pushconsttable(vm.get());
+      auto result = Table(vm.get(), -1);
+      sq_pop(vm.get(), 1);
+
+      return std::move(result);
+    }
+
   public:
     State(const unsigned int stackSize = 1024)
       : vm(sq_open(stackSize), sq_close)
       , root(_getRootTable())
+      , constants(_getConstTable())
     {
       sq_setprintfunc(vm.get(), detail::print, detail::error);
 
@@ -112,6 +126,14 @@ namespace marmot {
 
     const HSQUIRRELVM getVM() const {
       return vm.get();
+    }
+
+    Table & getRootTable() {
+      return root;
+    }
+
+    Table & getConstTable() {
+      return constants;
     }
   };
 } // marmot
