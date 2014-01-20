@@ -23,6 +23,7 @@
 #define MARMOT_TABLE_HPP
 
 #include "marmot/Reference.hpp"
+#include "marmot/Stack.hpp"
 #include <squirrel.h>
 #include <string>
 #include <vector>
@@ -47,6 +48,14 @@ namespace marmot {
 
     }
 
+    int getSize() const {
+      push();
+      auto size = sq_getsize(getState(), -1);
+      sq_pop(getState(), 1);
+
+      return size;
+    }
+
     std::vector<std::string> getSlots() const {
       std::vector<std::string> slots;
 
@@ -55,15 +64,33 @@ namespace marmot {
 
       while(SQ_SUCCEEDED(sq_next(getState(), -2))) {
           // Here -1 is the value and -2 is the key
-          const SQChar * key;
-          sq_getstring(getState(), -2, &key);
-          slots.push_back({key});
+          slots.push_back(stack::get<std::string>(getState(), -2));
           sq_pop(getState(), 2); // Pops key and value before the next iteration
       }
 
       sq_pop(getState(), 2); // Pops the null iterator and the table
 
       return slots;
+    }
+
+    template<typename T, typename U>
+    Table& set(T&& key, U&& value) {
+      push();
+      stack::push(getState(), std::forward<T>(key));
+      stack::push(getState(), std::forward<U>(value));
+      sq_newslot(getState(), -3, SQFalse);
+      sq_pop(getState(), 1);
+      return *this;
+    }
+
+    template<typename T, typename U>
+    T get(U&& key) {
+      push();
+      stack::push(getState(), std::forward<U>(key));
+      sq_get(getState(), -2);
+      auto value = stack::get<T>(getState(), -1);
+      sq_pop(getState(), 2); // Pops the slot value and table
+      return value;
     }
   };
 

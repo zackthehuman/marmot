@@ -55,6 +55,7 @@ namespace marmot {
     std::unique_ptr<SQVM, void(*)(SQVM*)> vm;
     Table root;
     Table constants;
+    Table registry;
 
     /**
      * Returns a Table object to the root table.
@@ -80,44 +81,26 @@ namespace marmot {
       return std::move(result);
     }
 
+    /**
+     * Returns a Table object to the registry table.
+     * @return a Table object to the registry table.
+     */
+    Table && _getRegistryTable() {
+      sq_pushregistrytable(vm.get());
+      auto result = Table(vm.get(), -1);
+      sq_pop(vm.get(), 1);
+
+      return std::move(result);
+    }
+
   public:
     State(const unsigned int stackSize = 1024)
       : vm(sq_open(stackSize), sq_close)
       , root(_getRootTable())
       , constants(_getConstTable())
+      , registry(_getRegistryTable())
     {
       sq_setprintfunc(vm.get(), detail::print, detail::error);
-
-      std::cout << "Stack size at start: " << sq_gettop(vm.get()) << std::endl;
-      std::cout << "Reference count: " << marmot::detail::referenceCount << std::endl;
-
-      sq_pushroottable(vm.get());
-      sq_pushstring(vm.get(), "print", -1);
-      sq_get(vm.get(), -2);         //get the function from the root table
-      sq_pushroottable(vm.get());   //’this’ (function environment object)
-      sq_pushstring(vm.get(), "Hello from marmot::State.", -1);
-      sq_call(vm.get(), 2, SQFalse, SQFalse);
-      sq_pop(vm.get(), 2);          //pops the roottable and the function
-
-      sq_pushroottable(vm.get());
-
-      // root = Reference(vm.get(), -1);
-      std::cout << "Reference count: " << marmot::detail::referenceCount << std::endl;
-      std::cout << "My type: " << root.getTypeString() << std::endl;
-      sq_pop(vm.get(), 1);
-
-      _getRootTable();
-
-      Reference r2 = _getRootTable();
-      std::cout << "Reference count: " << marmot::detail::referenceCount << std::endl;
-
-      Reference r3(r2);
-      std::cout << "Reference count: " << marmot::detail::referenceCount << std::endl;
-
-      r3 = r3;
-
-      std::cout << "Stack size at finish: " << sq_gettop(vm.get()) << std::endl;
-      std::cout << "Root table has " << root.getSlots().size() << " slot(s)." << std::endl;
     }
 
     ~State() {
@@ -134,6 +117,10 @@ namespace marmot {
 
     Table & getConstTable() {
       return constants;
+    }
+
+    Table & getRegistryTable() {
+      return registry;
     }
   };
 } // marmot

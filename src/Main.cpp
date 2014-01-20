@@ -12,67 +12,25 @@ int main(int argc, char** argv) {
   {
     marmot::State sq;
     std::cout << "Reference count in scope: " << marmot::detail::referenceCount << std::endl;
+
+    auto root = sq.getRootTable();
+    
+    std::cout << "Root table has " << root.getSize() << " slot(s)." << std::endl;
+
+    root.set("someKey", 1337);
+
+    std::cout << "Root table has " << root.getSize() << " slot(s)." << std::endl;
+
+    auto slots = root.getSlots();
+    for(int i = 0, len = slots.size(); i < len; ++i) {
+      std::cout << slots.at(i) << std::endl;
+    }
+
+    auto val = root.get<int>("someKey");
+    std::cout << "someKey = " << val << std::endl;
   }
 
   std::cout << "Reference count at end: " << marmot::detail::referenceCount << std::endl;
-  // std::cout << "Marmot test program." << std::endl;
-
-  // marmot::VM machine;
-  // std::cout << "Stack size: " << machine.getStackTop() << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-
-  // machine.call("print", "called me and printed!");
-
-  // std::cout << "Stack size: " << machine.getStackTop() << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-
-  // machine.push(11, 22, 33, 44, 55);
-  // std::cout << "Stack size: " << machine.getStackTop() << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-
-  // int output1 = 0;
-
-  // output1 = machine.call<int>("add", 2, 3);
-
-  // std::cout << "Output1: " << output1 << std::endl;
-  // std::cout << "Stack size: " << machine.getStackTop() << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-
-  // machine.call("noArgs");
-
-  // std::cout << "Stack size: " << machine.getStackTop() << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-  // std::cout << "Stack top:    " << machine.read<int>(-1) << std::endl;
-  // std::cout << "Stack bottom: " << machine.read<int>(2) << std::endl;
-
-  // int output2 = machine.call<int>("noArgsWithReturnValue");
-  // std::cout << "Output2: " << output2 << std::endl;
-
+ 
   return 0;
 };
