@@ -28,7 +28,7 @@
 namespace marmot {
   class MarmotError : public std::runtime_error {
   public:
-    MarmotError(const std::string& str) noexcept: std::runtime_error("marmot: error: " + str){
+    MarmotError(const std::string& str) noexcept: std::runtime_error("Error: " + str){
       
     }
   };

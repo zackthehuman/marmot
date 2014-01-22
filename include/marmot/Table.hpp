@@ -31,6 +31,10 @@
 
 namespace marmot {
 
+  // Forward declarations
+  template<typename Table, typename Key>
+  class Proxy;
+
   class Table : public Reference {
   public:
     Table() noexcept
@@ -96,12 +100,12 @@ namespace marmot {
 
     template<typename T>
     Proxy<Table, T> operator[](T&& key) {
-        return Proxy<Table, T>(*this, std::forward<T>(key));
+      return Proxy<Table, T>(*this, std::forward<T>(key));
     }
 
     template<typename T>
     Proxy<const Table, T> operator[](T&& key) const {
-        return Proxy<const Table, T>(*this, std::forward<T>(key));
+      return Proxy<const Table, T>(*this, std::forward<T>(key));
     }
   };
 

@@ -29,17 +29,12 @@
 
 namespace marmot {
 
-  namespace detail {
-    int referenceCount = 0;
-  }
-
   class Reference {
   private:
     HSQUIRRELVM vm = nullptr; // Non-owning pointer
     HSQOBJECT obj;
 
     bool release() {
-      detail::referenceCount--;
       return SQ_SUCCEEDED(sq_release(vm, &obj));
     }
 
@@ -56,14 +51,12 @@ namespace marmot {
       sq_resetobject(&obj);            // Initialize the handle
       sq_getstackobj(vm, index, &obj); // Retrieve an object handle from index
       sq_addref(vm, &obj);             // Adds a reference to the object
-      detail::referenceCount++;
     }
 
     Reference(Reference&& other) noexcept {
       vm = other.vm;
       obj = other.obj;
       sq_addref(vm, &obj);
-      detail::referenceCount++;
 
       other.vm = nullptr;
     }
@@ -72,7 +65,6 @@ namespace marmot {
       vm = other.vm;
       obj = other.obj;
       sq_addref(vm, &obj);
-      detail::referenceCount++;
     }
 
     Reference& operator=(Reference&& other) noexcept {
@@ -81,7 +73,6 @@ namespace marmot {
       vm = other.vm;
       obj = other.obj;
       sq_addref(vm, &obj);
-      detail::referenceCount++;
 
       other.release();
       other.vm = nullptr;
@@ -96,10 +87,27 @@ namespace marmot {
         vm = other.vm;
         obj = other.obj;
         sq_addref(vm, &obj);
-        detail::referenceCount++;
       } 
 
       return *this;
+    }
+
+    bool operator==(const Reference& other) noexcept {
+      if(getState() && (getState() == other.getState())) {
+        push();
+        other.push();
+
+        SQInteger cmp = sq_cmp(getState());
+        sq_pop(getState(), 2);
+
+        return 0 == cmp;
+      }
+
+      return false;
+    }
+
+    bool operator!=(const Reference& other) noexcept {
+      return !(*this == other);
     }
 
     virtual ~Reference() {
@@ -109,11 +117,19 @@ namespace marmot {
     }
 
     void push() const {
-      sq_pushobject(vm, obj);
+      if(vm) {
+        sq_pushobject(vm, obj);        
+      } else {
+        throw MarmotError("Reference has no HSQUIRRELVM.");
+      }
     }
 
     unsigned int getReferenceCount() {
-      return sq_getrefcount(vm, &obj);
+      if(vm) {
+        return sq_getrefcount(vm, &obj);
+      }
+
+      return 0;
     }
 
     HSQUIRRELVM getState() const noexcept {

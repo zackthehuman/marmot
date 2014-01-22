@@ -19,50 +19,8 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef MARMOT_PROXY_HPP
-#define MARMOT_PROXY_HPP
+#define CATCH_CONFIG_MAIN
+#include "test/Test.hpp"
 
-#include "marmot/Table.hpp"
-#include "marmot/Stack.hpp"
-#include <squirrel.h>
-#include <string>
-
-namespace marmot {
-
-  // Forward declarations
-  class Table;
-
-  template<typename Table, typename Key>
-  class Proxy {
-  private:
-    Table & table;
-    Key & key;
-
-  public:
-    template<typename T>
-    Proxy(Table& table, T&& key)
-      : table(table)
-      , key(std::forward<T>(key))
-    {
-
-    }
-
-    template<typename T>
-    T get() const {
-      return table.template get<T>(key);
-    }
-
-    template<typename T>
-    Proxy& set(T&& item) {
-      table.set(key, std::forward<T>(item));
-      return *this;
-    }
-
-    template<typename U>
-    void operator=(U&& other) {
-      table.set(key, std::forward<U>(other));
-    }
-  };
-} // marmot
-
-#endif // MARMOT_PROXY_HPP
+// This just contains the main() from Catch. See the other .cpp files for actual
+// test cases.

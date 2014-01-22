@@ -24,7 +24,9 @@
 
 #include "marmot/Error.hpp"
 #include "marmot/Reference.hpp"
+#include "marmot/Proxy.hpp"
 #include "marmot/Table.hpp"
+#include "marmot/Stack.hpp"
 #include <squirrel.h>
 #include <iostream>
 #include <memory>
@@ -32,7 +34,7 @@
 
 namespace marmot {
   namespace detail {
-    void print(HSQUIRRELVM vm, const SQChar *s, ...) {
+    inline void print(HSQUIRRELVM vm, const SQChar *s, ...) {
       va_list vl; 
       va_start(vl, s);
       vprintf(s, vl);
@@ -40,7 +42,7 @@ namespace marmot {
       printf("\n");
     }
 
-    void error(HSQUIRRELVM vm, const SQChar *s, ...) {
+    inline void error(HSQUIRRELVM vm, const SQChar *s, ...) {
       printf("Squirrel error! ");
       va_list vl; 
       va_start(vl, s);
@@ -104,23 +106,108 @@ namespace marmot {
     }
 
     ~State() {
-      std::cout << "~State() " << sq_gettop(vm.get()) << std::endl; 
     }
 
+    /**
+     * Gets a handle (pointer) to the owned Squirrel VM.
+     * @return Squirrel VM handle
+     */
     const HSQUIRRELVM getVM() const {
       return vm.get();
     }
 
+    /**
+     * Compiles and executes a string of Squirrel code.
+     * @param script [description]
+     */
+    void runString(const std::string & script, bool pushReturnValue = false) {
+      SQRESULT compileResult = sq_compilebuffer(
+        getVM(),
+        script.c_str(),
+        static_cast<SQInteger>(script.size() * sizeof(SQChar)), _SC(""),
+        true
+      );
+
+      if(SQ_FAILED(compileResult)) {
+        sq_getlasterror(getVM());
+        std::string error = stack::get<std::string>(getVM(), -1);
+        sq_pop(getVM(), 1); // Pop the error
+        throw MarmotError(error);
+      } else {
+        // The closure is on the stack at position -1
+        sq_pushroottable(getVM());
+        SQRESULT callResult = sq_call(getVM(), 1, pushReturnValue, true);
+         // Remove the closure from the stack, reatining the return value if specified
+        sq_remove(getVM(), pushReturnValue ? -2 : -1);
+
+        if(SQ_FAILED(callResult)) {
+          sq_getlasterror(getVM());
+          sq_tostring(getVM(), -1); // Convert the error object to a string
+          std::string error = stack::get<std::string>(getVM(), -1);
+          sq_pop(getVM(), 1); // Pop the error
+          throw MarmotError(error);
+        }
+      }
+    }
+
+    /**
+     * Gets the root table.
+     * @return a wrapper object for the root table
+     */
     Table & getRootTable() {
       return root;
     }
 
+    /**
+     * Gets the constants table.
+     * @return a wrapper object for the constants table
+     */
     Table & getConstTable() {
       return constants;
     }
 
+    /**
+     * Gets the registry table.
+     * @return a wrapper object for the registry table
+     */
     Table & getRegistryTable() {
       return registry;
+    }
+
+    /**
+     * Creates a new table and returns a wrapper object for it.
+     * @return a wrapper object for a native Squirrel table
+     */
+    Table createTable() {
+      root.push();
+      sq_newtable(getVM());
+
+      Table result(getVM(), -1);
+      sq_pop(getVM(), 2); // Pops the new table and the root table
+
+      return result;
+    }
+
+    /**
+     * Proxies getting and setting values through the state to the root table.
+     * This can be used to get or set global variables.
+     *
+     * @return a proxy object to the value found by Key in the root table
+     */
+    template<typename T>
+    Proxy<Table, T> operator[](T&& key) {
+      return root[std::forward<T>(key)];
+    }
+
+    /**
+     * Proxies getting and setting values through the state to the root table.
+     * This can be used to get global variables.
+     *
+     * @return a proxy object to the value found by Key in the root table (const)
+     */
+    template<typename T>
+    Proxy<const Table, T> operator[](T&& key) const {
+      return root[std::forward<T>(key)];
     }
   };
 } // marmot

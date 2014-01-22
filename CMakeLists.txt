@@ -69,7 +69,11 @@ set(MARMOT_SRC_LIBRARY
 set(MARMOT_SRC_LIBRARY
     include/marmot/VM.hpp
     include/marmot/Error.hpp
+    include/marmot/Proxy.hpp
+    include/marmot/Reference.hpp
+    include/marmot/Stack.hpp
     include/marmot/State.hpp
+    include/marmot/Table.hpp
 )
 
 source_group("library" FILES ${MARMOT_SRC_LIBRARY} ${MARMOT_HEADER_LIBRARY})
@@ -101,8 +105,27 @@ set(SQUIRREL_FILES
     ${SQUIRREL_DIR}/sqstdlib/sqstdsystem.cpp
 )
 
+#
+# catch
+#
+set(CATCH_DIR "${PROJECT_SOURCE_DIR}/extlibs/catch")
+
+#
+# test
+#
+set(MARMOT_SRC_TEST
+    src/test/Test.cpp
+    src/test/TestReference.cpp
+    src/test/TestState.cpp
+)
+
+set(MARMOT_HEADER_TEST
+    include/test/Test.hpp
+)
+
 include_directories(
     include
+    extlibs
     ${SQUIRREL_DIR}/include
     ${SQUIRREL_DIR}/squirrel
     ${SQUIRREL_DIR}/sqstdlib
@@ -114,6 +137,16 @@ include_directories(
 add_executable(
     ${MARMOT_EXE_NAME}
     ${MARMOT_SRC_MAIN}
+    ${MARMOT_SRC_LIBRARY}
+    ${SQUIRREL_FILES}
+)
+
+#
+# test-marmot (executable)
+#
+add_executable(
+    test-${MARMOT_EXE_NAME}
+    ${MARMOT_SRC_TEST}
     ${MARMOT_SRC_LIBRARY}
     ${SQUIRREL_FILES}
 )
