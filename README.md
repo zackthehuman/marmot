@@ -1,6 +1,6 @@
 # Marmot
 
-Marmot is a C++ wrapper for [http://www.squirrel-lang.org](Squirrel). It has been
+Marmot is a C++ wrapper for [Squirrel](http://www.squirrel-lang.org). It has been
 built and tested with Squirrel 3.04. Marmot aims to be easy to use and easy to
 add into existing projects.
 
@@ -43,5 +43,5 @@ See the `test` directory for examples of how to use the Marmot API.
 
 ## Kudos
 
-This project was inspired by other C++ wrappers like [https://github.com/Rapptz/sol/](Sol)
-and [https://github.com/jeremyong/Selene](Selene).
+This project was inspired by other C++ wrappers like [Sol](https://github.com/Rapptz/sol/)
+and [Selene](https://github.com/jeremyong/Selene).
