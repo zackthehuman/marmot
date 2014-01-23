@@ -124,6 +124,12 @@ TEST_CASE( "State can execute script from a string", "[marmot::State]" ) {
 
   REQUIRE_NOTHROW(sq.runString("d <- \"marmot\";"));
   REQUIRE(sq["d"].get<std::string>() == "marmot");
+
+  REQUIRE_NOTHROW(sq.runString("e <- \"marmot\\0with embedded null\";"));
+  REQUIRE(std::string(sq["e"].get<const SQChar*>()) == "marmot\0with embedded null");
+
+  REQUIRE_NOTHROW(sq.runString("f <- \"marmot\\0with embedded null\";"));
+  REQUIRE(sq["f"].get<std::string>() == "marmot\0with embedded null");
 }
 
 TEST_CASE( "State executing script from a string doesn't change the stack by default", "[marmot::State]" ) {
@@ -140,7 +146,7 @@ TEST_CASE( "State executing script from a string doesn't change the stack by def
 
 TEST_CASE( "State executing script from a string does change the stack if specified", "[marmot::State]" ) {
   marmot::State sq;
-  const auto expected = 41;
+  const float expected = 41;
 
   marmot::stack::push(sq.getVM(), expected);
   

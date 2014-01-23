@@ -31,11 +31,13 @@
 namespace marmot {
 
   namespace detail {
-    // TODO
+
     template<typename T>
     inline T getNull(HSQUIRRELVM vm, std::true_type, int index = -1) {
-      // if(lua_isnil(L, index) == 0)
-      //    throw sol::sol_error("not nil");
+      if(sq_gettype(vm, index) != OT_NULL) {
+        throw MarmotError("Value not null.");
+      }
+
       return nullptr;
     }
 
@@ -49,12 +51,6 @@ namespace marmot {
     inline T getHelper(HSQUIRRELVM vm, std::true_type, int index = -1) {
         return getNull<T>(vm, std::is_same<std::nullptr_t, T>(), index);
     }
-
-    // template<typename T>
-    // inline T getHelper(HSQUIRRELVM vm, std::false_type, int index = -1) {
-    //     // T is a fundamental type
-    //     return get_arithmetic<T>(vm, std::is_integral<T>{}, index);
-    // }
   }
 
   namespace stack {
@@ -108,47 +104,57 @@ namespace marmot {
     }
 
     template<>
+    inline const SQChar* get(HSQUIRRELVM vm, int index) {
+      const SQChar* value = nullptr;
+
+      if(SQ_SUCCEEDED(sq_getstring(vm, index, &value))) {
+          // Yay!
+      }
+
+      return value;
+    }
+
+    template<>
     inline Reference get(HSQUIRRELVM vm, int index) {
       return Reference(vm, index);
     }
 
+    template<typename T>
+    inline T pop(HSQUIRRELVM vm) {
+      auto ret = get<T>(vm);
+      sq_pop(vm, 1);
+      return ret;
+    }
+
     inline void push(HSQUIRRELVM vm, const Reference & value) {
-      std::cout << "Pushing Reference &" << std::endl;
       value.push();
     }
 
     inline void push(HSQUIRRELVM vm, const float value) {
-      std::cout << "Pushing const float" << std::endl;
       sq_pushfloat(vm, value);
     }
 
     inline void push(HSQUIRRELVM vm, const int value) {
-      std::cout << "Pushing const int" << std::endl;
       sq_pushinteger(vm, value);
     }
 
-    inline void push(HSQUIRRELVM vm, const bool && value) {
-      std::cout << "Pushing const bool" << std::endl;
+    inline void push(HSQUIRRELVM vm, const bool value) {
       sq_pushbool(vm, value);
     }
 
     inline void push(HSQUIRRELVM vm, const std::string & value) {
-      std::cout << "Pushing const std::string &" << std::endl;
       sq_pushstring(vm, value.c_str(), -1);
     }
 
     inline void push(HSQUIRRELVM vm, const std::string && value) {
-      std::cout << "Pushing const std::string &&" << std::endl;
       sq_pushstring(vm, value.c_str(), -1);
     }
 
     inline void push(HSQUIRRELVM vm, const SQChar * value) {
-      std::cout << "Pushing const SQChar *" << std::endl;
       sq_pushstring(vm, value, -1);
     }
 
     inline void push(HSQUIRRELVM vm, std::nullptr_t value) {
-      std::cout << "Pushing nullptr_t" << std::endl;
       sq_pushnull(vm);
     }
   }
