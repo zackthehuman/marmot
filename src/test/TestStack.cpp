@@ -70,6 +70,27 @@ TEST_CASE( "Pushing and reading values works correctly", "[marmot::stack]" ) {
   REQUIRE(marmot::stack::get<std::nullptr_t>(sq.getVM(), -1) == nullptr);
 }
 
+TEST_CASE( "Pushing with no arguments pushes nothing", "[marmot::stack]" ) {
+  marmot::State sq;
+
+  REQUIRE(sq_gettop(sq.getVM()) == 0);
+  marmot::stack::push(sq.getVM());
+  REQUIRE(sq_gettop(sq.getVM()) == 0);
+}
+
+TEST_CASE( "Pushing multiple arguments pushes all of them", "[marmot::stack]" ) {
+  marmot::State sq;
+
+  REQUIRE(sq_gettop(sq.getVM()) == 0);
+  marmot::stack::push(sq.getVM(), "this", 15, true, nullptr, 5.0f);
+  REQUIRE(sq_gettop(sq.getVM()) == 5);
+  REQUIRE(sq_gettype(sq.getVM(), 1) == OT_STRING);
+  REQUIRE(sq_gettype(sq.getVM(), 2) == OT_INTEGER);
+  REQUIRE(sq_gettype(sq.getVM(), 3) == OT_BOOL);
+  REQUIRE(sq_gettype(sq.getVM(), 4) == OT_NULL);
+  REQUIRE(sq_gettype(sq.getVM(), 5) == OT_FLOAT);
+}
+
 TEST_CASE( "Reading values with mismatched types throws exceptions", "[marmot::stack]" ) {
   marmot::State sq;
 

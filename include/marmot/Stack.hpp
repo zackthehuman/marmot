@@ -126,6 +126,10 @@ namespace marmot {
       return ret;
     }
 
+    inline void push(HSQUIRRELVM vm) {
+      // This allows us to call functions with no arguments.
+    }
+
     inline void push(HSQUIRRELVM vm, const Reference & value) {
       value.push();
     }
@@ -156,6 +160,12 @@ namespace marmot {
 
     inline void push(HSQUIRRELVM vm, std::nullptr_t value) {
       sq_pushnull(vm);
+    }
+
+    template <typename T, typename... Ts>
+    inline void push(HSQUIRRELVM vm, const T value, const Ts... values) {
+      push(vm, value);
+      push(vm, values...);
     }
   }
 
