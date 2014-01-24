@@ -126,6 +126,11 @@ namespace marmot {
       return ret;
     }
 
+    template<>
+    inline void pop(HSQUIRRELVM vm) {
+      // Do nothing
+    }
+
     inline void push(HSQUIRRELVM vm) {
       // This allows us to call functions with no arguments.
     }
@@ -162,6 +167,7 @@ namespace marmot {
       sq_pushnull(vm);
     }
 
+    // Allows for multi-value pushing of heterogenous types
     template <typename T, typename... Ts>
     inline void push(HSQUIRRELVM vm, const T value, const Ts... values) {
       push(vm, value);

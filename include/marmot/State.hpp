@@ -130,6 +130,7 @@ namespace marmot {
 
       if(SQ_FAILED(compileResult)) {
         sq_getlasterror(getVM());
+        sq_tostring(getVM(), -1);
         std::string error = stack::get<std::string>(getVM(), -1);
         sq_pop(getVM(), 1); // Pop the error
         throw MarmotError(error);
