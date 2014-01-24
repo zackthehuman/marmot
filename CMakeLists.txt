@@ -115,6 +115,7 @@ set(CATCH_DIR "${PROJECT_SOURCE_DIR}/extlibs/catch")
 #
 set(MARMOT_SRC_TEST
     src/test/Test.cpp
+    src/test/TestFunction.cpp
     src/test/TestReference.cpp
     src/test/TestStack.cpp
     src/test/TestState.cpp

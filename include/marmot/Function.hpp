@@ -84,8 +84,8 @@ namespace marmot {
         sq_getlasterror(vm);
         sq_tostring(vm, -1);
         std::string error = stack::get<std::string>(vm, -1);
-        sq_pop(vm, 1); // Pop the error
-        std::cout << "Error calling the func! " << error << std::endl;        
+        sq_pop(vm, 1); // Pop the error object
+        throw MarmotError("Error calling the function, reason: " + error);
       }
 
       // Remove the closure from the stack before popping the return value
